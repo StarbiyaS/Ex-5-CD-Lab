@@ -40,37 +40,43 @@ int yywrap() {
 %{
 #include <stdio.h>
 #include <stdlib.h>
-
-void yyerror(char *s);
-int yylex(void);
+int count = 0;  // to count number of a's
 %}
 
-%token A B NL
+%token A B
 
-%% 
+%%
+start:
+    sequence B '\n' {
+        if (count >= 10) {
+            printf("Valid string: %d a's followed by b\n", count);
+        } else {
+            printf("Invalid: Less than 10 a's\n");
+        }
+        count = 0; // reset for next input
+    }
+    ;
 
-stmt: S NL { printf("Valid string\n"); exit(0); }
-;
-
-S: A S B | /* Allow for empty production */
-  
-;
-
-%% 
-
-void yyerror(char *s) {
-    fprintf(stderr, "Invalid string\n");
-}
+sequence:
+    A { count++; }
+  | sequence A { count++; }
+  ;
+%%
 
 int main() {
-    printf("Enter the string:");
-    yyparse();
-    return 0;
+    printf("Enter a string (aⁿb where n >= 10):\n");
+    return yyparse();
 }
+
+void yyerror(const char *msg) {
+    printf("Syntax error: %s\n", msg);
+}
+
 ```
 
 # OUTPUT
-![image](https://github.com/user-attachments/assets/eb02bf6b-acd9-4fa0-9c73-a979fb1f7cb4)
+![image](https://github.com/user-attachments/assets/b6e1d49e-a68f-4bc1-a3b2-3afe6dd65132)
+
 
 # RESULT
 The YACC program to recognize the grammar anb where n>=10 is executed successfully and the output is verified.
